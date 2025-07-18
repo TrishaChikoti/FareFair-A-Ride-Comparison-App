@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\""
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\"",
+    "start": "node backend/server.js",
+    "dev-backend": "nodemon index.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.0"
