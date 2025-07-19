@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -40,7 +41,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/farefair'
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Routes
+// API routes
 app.use('/api/rides', require('./routes/rides'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
@@ -54,6 +55,26 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.send('FareFair backend API is running.');
+});
+
+// Favicon handler (no content)
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+// Serve frontend static files (adjust 'public' if needed)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve frontend index.html for any unknown non-API route (for SPA support)
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } else {
+    res.status(404).json({ error: 'Route not found' });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -63,14 +84,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = app;
+
